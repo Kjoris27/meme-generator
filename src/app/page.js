@@ -195,7 +195,7 @@ export default function Home() {
     color="primary"
     onClick={() => handleDownloadImage(background)}
   >
-    Télécharger l'image
+    Download 
   </Button>
 </div>
   <MemeShare imageUrl={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/${background}`} />
