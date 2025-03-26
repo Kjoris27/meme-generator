@@ -1,32 +1,40 @@
 import React from "react";
-import { Button } from "@mui/material";
-import { Facebook, WhatsApp, Instagram, Twitter } from "@mui/icons-material";
-
-const shareLinks = (imageUrl) => ({
-  facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(imageUrl)}`,
-  twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(imageUrl)}&text=Regarde ce meme génial !`,
-  whatsapp: `https://api.whatsapp.com/send?text=Regarde ce meme génial ! ${encodeURIComponent(imageUrl)}`,
-});
+import {
+  FacebookShareButton,
+  TwitterShareButton,
+  WhatsappShareButton,
+  LinkedinShareButton,
+} from "react-share";
+import { Facebook, Twitter, WhatsApp, LinkedIn } from "@mui/icons-material";
 
 const MemeShare = ({ imageUrl }) => {
-  const links = shareLinks(imageUrl);
-
   return (
     <div className="mt-4 text-center">
-      <p>Partager sur :</p>
+      <p>Share on:</p>
       <div className="flex justify-center gap-4">
-        <Button variant="contained" color="primary" onClick={() => window.open(links.facebook, '_blank')}>
-          <Facebook />
-        </Button>
-        <Button variant="contained" color="success" onClick={() => window.open(links.whatsapp, '_blank')}>
-          <WhatsApp />
-        </Button>
-        <Button variant="contained" color="info" onClick={() => window.open(links.twitter, '_blank')}>
-          <Twitter />
-        </Button>
-        <Button variant="contained" color="secondary" onClick={() => alert("Instagram ne supporte pas le partage direct !")}>
-          <Instagram />
-        </Button>
+        {/* Facebook Share */}
+        <FacebookShareButton url={imageUrl} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "8px 16px", backgroundColor: "#1877F2", color: "white", borderRadius: "4px", cursor: "pointer" }}>
+          <Facebook style={{ marginRight: "8px" }} />
+          Facebook
+        </FacebookShareButton>
+
+        {/* WhatsApp Share */}
+        <WhatsappShareButton url={imageUrl} title="Regarde ce meme génial !" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "8px 16px", backgroundColor: "#25D366", color: "white", borderRadius: "4px", cursor: "pointer" }}>
+          <WhatsApp style={{ marginRight: "8px" }} />
+          WhatsApp
+        </WhatsappShareButton>
+
+        {/* Twitter Share */}
+        <TwitterShareButton url={imageUrl} title="Regarde ce meme génial !" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "8px 16px", backgroundColor: "#1DA1F2", color: "white", borderRadius: "4px", cursor: "pointer" }}>
+          <Twitter style={{ marginRight: "8px" }} />
+          Twitter
+        </TwitterShareButton>
+
+        {/* LinkedIn Share */}
+        <LinkedinShareButton url={imageUrl} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "8px 16px", backgroundColor: "#0077B5", color: "white", borderRadius: "4px", cursor: "pointer" }}>
+          <LinkedIn style={{ marginRight: "8px" }} />
+          LinkedIn
+        </LinkedinShareButton>
       </div>
     </div>
   );

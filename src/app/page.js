@@ -6,6 +6,9 @@ import { CldImage, CldUploadWidget  } from 'next-cloudinary';
 
 import MemeShare from '@/components/MemeShare';
 
+import Gallery from "@/components/Gallery";
+
+
 import { Button } from '@mui/material';
 
 const BACKGROUND_IMAGES = [
@@ -28,7 +31,8 @@ export default function Home() {
   const [topText, setTopText ] = useState('Top Text');
   const [bottomText, setBottomText ] = useState('Bottom text');
   const [background, setBackground ] = useState(BACKGROUND_IMAGES[0].id);
-
+  const [downloadedImages, setDownloadedImages] = useState([]);
+ 
 
   function handleOnTopTextChange(e) {
       setTopText(e.currentTarget.value);
@@ -48,36 +52,38 @@ export default function Home() {
     console.log(result);
   }
 
- 
-  
 
+ async function handleDownloadImage(imageId) {
 
-  async function handleDownloadImage(imageId) {
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+
+  const url = `https://res.cloudinary.com/${cloudName}/image/upload/l_text:Source%20Sans%20Pro_20_bold_center:${encodeURIComponent(
+    topText
+  )},co_rgb:FFFFFF,g_north,y_30,c_fit/l_text:Source%20Sans%20Pro_20_bold_center:${encodeURIComponent(
+    bottomText
+  )},co_rgb:FFFFFF,g_south,y_30,c_fit/${imageId}`;
+
+  try {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const blobUrl = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = blobUrl;
+    link.download = 'meme-image.jpg';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(blobUrl);
+
+    setDownloadedImages((prevImages) => [...prevImages, url]);
+  } 
   
-    const url = `https://res.cloudinary.com/${cloudName}/image/upload/l_text:Source%20Sans%20Pro_20_bold_center:${encodeURIComponent(
-      topText
-    )},co_rgb:FFFFFF,g_north,y_30,c_fit/l_text:Source%20Sans%20Pro_20_bold_center:${encodeURIComponent(
-      bottomText
-    )},co_rgb:FFFFFF,g_south,y_30,c_fit/${imageId}`;
-  
-    try {
-      const response = await fetch(url);
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-  
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = 'meme-image.jpg';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-  
-      URL.revokeObjectURL(blobUrl);
-    } catch (error) {
-      console.error("Erreur lors du téléchargement de l'image:", error);
-    }
+   catch (error) {
+    console.error("Erreur lors du téléchargement de l'image:", error);
   }
+}
   
 
   
@@ -149,14 +155,14 @@ export default function Home() {
           </form>
         </div>
        <div className="md:flex-1 mt-2">
-  <CldImage
-    src={background}
-    width="400"
-    height="320"
-    sizes="100vw"
-    alt="Description of my image"
-    className="max-w-[400px] h-auto mx-auto"
-    overlays={[
+        <CldImage
+          src={background}
+          width="400"
+          height="320"
+          sizes="100vw"
+          alt="Description of my image"
+          className="max-w-[400px] h-auto mx-auto"
+          overlays={[
       {
         position: {
           x: 0,
@@ -198,11 +204,18 @@ export default function Home() {
     Download 
   </Button>
 </div>
-  <MemeShare imageUrl={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/${background}`} />
-
+<MemeShare
+  imageUrl={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/l_text:Source%20Sans%20Pro_20_bold_center:${encodeURIComponent(
+    topText
+  )},co_rgb:FFFFFF,g_north,y_30,c_fit/l_text:Source%20Sans%20Pro_20_bold_center:${encodeURIComponent(
+    bottomText
+  )},co_rgb:FFFFFF,g_south,y_30,c_fit/${background}`}
+  onDownload={() => handleDownloadImage(background)}
+/>
 </div>
 
       </div>
+      <Gallery images={downloadedImages} />
     </main>
   );
 }
