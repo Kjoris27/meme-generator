@@ -28,8 +28,8 @@ const BACKGROUND_IMAGES = [
 
 export default function Home() {
 
-  const [topText, setTopText ] = useState('Top Text');
-  const [bottomText, setBottomText ] = useState('Bottom text');
+  const [topText, setTopText ] = useState('');
+  const [bottomText, setBottomText ] = useState('');
   const [background, setBackground ] = useState(BACKGROUND_IMAGES[0].id);
   const [downloadedImages, setDownloadedImages] = useState([]);
  
@@ -53,37 +53,41 @@ export default function Home() {
   }
 
 
- async function handleDownloadImage(imageId) {
-
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-
-  const url = `https://res.cloudinary.com/${cloudName}/image/upload/l_text:Source%20Sans%20Pro_20_bold_center:${encodeURIComponent(
-    topText
-  )},co_rgb:FFFFFF,g_north,y_30,c_fit/l_text:Source%20Sans%20Pro_20_bold_center:${encodeURIComponent(
-    bottomText
-  )},co_rgb:FFFFFF,g_south,y_30,c_fit/${imageId}`;
-
-  try {
-    const response = await fetch(url);
-    const blob = await response.blob();
-    const blobUrl = URL.createObjectURL(blob);
-
-    const link = document.createElement('a');
-    link.href = blobUrl;
-    link.download = 'meme-image.jpg';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    URL.revokeObjectURL(blobUrl);
-
-    setDownloadedImages((prevImages) => [...prevImages, url]);
-  } 
+  async function handleDownloadImage(imageId) {
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
   
-   catch (error) {
-    console.error("Erreur lors du téléchargement de l'image:", error);
+    const topTextOverlay = topText
+      ? `l_text:Source%20Sans%20Pro_20_bold_center:${encodeURIComponent(
+          topText
+        )},co_rgb:FFFFFF,g_north,y_30,c_fit/`
+      : '';
+    const bottomTextOverlay = bottomText
+      ? `l_text:Source%20Sans%20Pro_20_bold_center:${encodeURIComponent(
+          bottomText
+        )},co_rgb:FFFFFF,g_south,y_30,c_fit/`
+      : '';
+  
+    const url = `https://res.cloudinary.com/${cloudName}/image/upload/${topTextOverlay}${bottomTextOverlay}${imageId}`;
+  
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+  
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = 'meme-image.jpg';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+  
+      URL.revokeObjectURL(blobUrl);
+  
+      setDownloadedImages((prevImages) => [...prevImages, url]);
+    } catch (error) {
+      console.error('Erreur lors du téléchargement de l\'image:', error);
+    }
   }
-}
   
 
   
@@ -99,9 +103,11 @@ export default function Home() {
               <input
                 type="text"
                 name="top-text"
-                placeholder="Top Text"
+                placeholder="Texte principal"
                 className="border border-gray-300 rounded px-4 py-2 w-full"
                 onChange={handleOnTopTextChange}
+                  spellCheck={false} 
+
 
               />
             </div>
@@ -109,9 +115,11 @@ export default function Home() {
               <input
                 type="text"
                 name="bottom-text"
-                placeholder="Bottom Text"
+                placeholder="Texte de bas"
                 className="border border-gray-300 rounded px-4 py-2 w-full"
                 onChange={handleOnBottomTextChange}
+                  spellCheck={false} 
+
               />
             </div>
             <div>
@@ -145,7 +153,7 @@ export default function Home() {
      return (
 
        <Button variant="contained" color="success" onClick={handleOnClick}>
-       Upload an Image
+       Uploader une image
       </Button>
      );
    }}
@@ -155,61 +163,77 @@ export default function Home() {
           </form>
         </div>
        <div className="md:flex-1 mt-2">
-        <CldImage
-          src={background}
-          width="400"
-          height="320"
-          sizes="100vw"
-          alt="Description of my image"
-          className="max-w-[400px] h-auto mx-auto"
-          overlays={[
-      {
-        position: {
-          x: 0,
-          y: 30,
-          gravity: 'north',
-        },
-        text: {
-          color: 'white',
-          fontFamily: 'Source Sans Pro',
-          fontSize: 20,
-          fontWeight: 'black',
-          text: topText,
-          stroke: true,
-        },
-      },
-      {
-        position: {
-          x: 0,
-          y: 30,
-          gravity: 'south',
-        },
-        text: {
-          color: 'white',
-          fontFamily: 'Source Sans Pro',
-          fontSize: 20,
-          fontWeight: 'black',
-          text: bottomText,
-          stroke: true,
-        },
-      },
-    ]}
-  />
+       <CldImage
+  src={background}
+  width="400"
+  height="320"
+  sizes="100vw"
+  alt="Description of my image"
+  className="max-w-[400px] h-auto mx-auto"
+  overlays={[
+    ...(topText
+      ? [
+          {
+            position: {
+              x: 0,
+              y: 30,
+              gravity: 'north',
+            },
+            text: {
+              color: 'white',
+              fontFamily: 'Source Sans Pro',
+              fontSize: 20,
+              fontWeight: 'black',
+              text: topText,
+              stroke: true,
+            },
+          },
+        ]
+      : []),
+    ...(bottomText
+      ? [
+          {
+            position: {
+              x: 0,
+              y: 30,
+              gravity: 'south',
+            },
+            text: {
+              color: 'white',
+              fontFamily: 'Source Sans Pro',
+              fontSize: 20,
+              fontWeight: 'black',
+              text: bottomText,
+              stroke: true,
+            },
+          },
+        ]
+      : []),
+  ]}
+/>
   <div className="mt-4 text-center">
   <Button
     variant="contained"
     color="primary"
     onClick={() => handleDownloadImage(background)}
   >
-    Download 
+    Télécharger  
   </Button>
 </div>
 <MemeShare
-  imageUrl={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/l_text:Source%20Sans%20Pro_20_bold_center:${encodeURIComponent(
+  imageUrl={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/${
     topText
-  )},co_rgb:FFFFFF,g_north,y_30,c_fit/l_text:Source%20Sans%20Pro_20_bold_center:${encodeURIComponent(
+      ? `l_text:Source%20Sans%20Pro_20_bold_center:${encodeURIComponent(
+          topText
+        )},co_rgb:FFFFFF,g_north,y_30,c_fit/`
+      : ''
+  }${
     bottomText
-  )},co_rgb:FFFFFF,g_south,y_30,c_fit/${background}`}
+      ? `l_text:Source%20Sans%20Pro_20_bold_center:${encodeURIComponent(
+          bottomText
+        )},co_rgb:FFFFFF,g_south,y_30,c_fit/`
+      : ''
+  }${background}`}
   onDownload={() => handleDownloadImage(background)}
 />
 </div>
